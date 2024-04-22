@@ -340,7 +340,8 @@ namespace MLM2PRO_BT_APP.connections
         public double SideSpin { get; set; }
         public double Hla { get; set; }
         public double Vla { get; set; }
-        // public double CarryDistance { get; set; }
+        public double CarryDistance { get; set; }
+        public double TotalDistance { get; set; }
 
     }
     public class ClubData

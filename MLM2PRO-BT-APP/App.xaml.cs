@@ -7,6 +7,9 @@ using System.Net;
 using MLM2PRO_BT_APP.connections;
 using MLM2PRO_BT_APP.devices;
 using MLM2PRO_BT_APP.util;
+using System.Net.Http;
+using System.Text;
+
 namespace MLM2PRO_BT_APP;
 public partial class App
 {
@@ -19,6 +22,8 @@ public partial class App
     private OpenConnectServer? _openConnectServerInstance;
     private string? _lastMessage = "";
     private BluetoothScanner? _bluetoothScanner;
+    private static readonly HttpClient client = new HttpClient();
+
     public App()
     {
         DispatcherUnhandledException += OnDispatcherUnhandledException;
@@ -193,9 +198,25 @@ public partial class App
             Logger.Log($"Error sending message: {ex.Message}");
         }
     }
+
+    public async Task<bool> SendToApi(OpenConnectApiMessage? messageToSend)
+    {
+        var json = JsonConvert.SerializeObject(messageToSend);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("https://aw684qhrr8.execute-api.us-west-2.amazonaws.com/data", content);
+
+        var responseText = await response.Content.ReadAsStringAsync();
+
+        Logger.Log(responseText);
+
+        return responseText != null;
+    }
+
     public async Task SendShotData(OpenConnectApiMessage? messageToSend)
     {
-        bool dataSent = messageToSend != null && await _client.SendDataAsync(messageToSend);
+        //bool dataSent = messageToSend != null; //&& await _client.SendDataAsync(messageToSend);
+        bool dataSent = messageToSend != null && await SendToApi(messageToSend);
         try
         {
             string result;
